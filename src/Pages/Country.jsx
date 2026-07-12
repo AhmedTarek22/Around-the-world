@@ -8,7 +8,7 @@ const Country = () => {
   const translate = useSelector((state) => state.language.translation);
   const { country } = useParams();
   const { countriesData, isError, isLoading } = useFetchData(country);
-  console.log(countriesData);
+  console.log({ countriesData, country });
 
   return (
     <>
@@ -137,10 +137,10 @@ const Country = () => {
           <div className="mt-8 flex flex-col gap-24 md:flex-row">
             <img
               className="h-[400px] w-[560px]"
-              src={countriesData?.flags?.svg}
-              alt="img"
+              src={`https://flagcdn.com/w640/${countriesData?.cca2?.toLowerCase()}.png`}
+              alt={countriesData?.name?.common}
             />
-            <div className="w-full md:w-1/2 md:mt-10">
+            <div className="w-full md:mt-10 md:w-1/2">
               <h1 className="mb-6 text-3xl font-extrabold">
                 {countriesData?.name?.common}
               </h1>
@@ -182,7 +182,7 @@ const Country = () => {
                 <div className="leading-8">
                   <div>
                     <span className="font-semibold">
-                      {translate.TopLevelDomain}:  
+                      {translate.TopLevelDomain}:
                     </span>
                     <span className="font-light">
                       {countriesData?.tld?.join(", ")}

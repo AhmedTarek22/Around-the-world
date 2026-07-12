@@ -7,59 +7,54 @@ const useFetchData = (country) => {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    if (country) {
-      fetchDataFromAPI();
-    } else {
-      fetchDataFromLocalStorage();
-    }
-  }, []);
+    fetchData();
+  }, [country]);
 
-  const fetchDataFromAPI = () => {
-    let url = "https://restcountries.com/v3.1/all";
-    if (country) {
-      url = `https://restcountries.com/v3.1/name/${country}`;
-    }
+  const fetchData = async () => {
     setIsLoading(true);
-    fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (country) {
-          //Country page
-          setCountriesData(data[0]);
-        } else {
-          //Home page
-          localStorage.setItem("countries", JSON.stringify(data));
-          setCountriesData(data);
-          setFilteredCountries(data);
-        }
-      })
-      .catch(() => {
-        setIsError(true);
-      })
-      .finally(() => setIsLoading(false));
-  };
+    setIsError(false);
 
-  const fetchDataFromLocalStorage = () => {
-    const data = JSON.parse(localStorage.getItem("countries"));
-    if (data) {
-      setCountriesData(data);
-      setFilteredCountries(data);
-    } else {
-      fetchDataFromAPI();
+    try {
+      const response = await fetch(
+        "https://raw.githubusercontent.com/mledoze/countries/master/countries.json",
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+      console.log(data[0]);
+
+      if (country) {
+        const selectedCountry = data.find(
+          (item) => item.name.common.toLowerCase() === country.toLowerCase(),
+        );
+
+        if (!selectedCountry) {
+          throw new Error("Country not found");
+        }
+
+        setCountriesData(selectedCountry);
+      } else {
+        setCountriesData(data);
+        setFilteredCountries(data);
+        localStorage.setItem("countries", JSON.stringify(data));
+      }
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     countriesData,
-    setFilteredCountries,
     filteredCountries,
-    isError,
+    setFilteredCountries,
     isLoading,
+    isError,
   };
 };
 
